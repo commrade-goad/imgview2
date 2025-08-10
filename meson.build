@@ -18,7 +18,7 @@ deps = [
 
 infile = [
   'src/main.cpp', 'src/window.cpp',
-  'src/argparse.cpp'
+  'src/argparse.cpp', 'src/state.cpp'
   ]
 
 executable(

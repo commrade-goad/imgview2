@@ -1,1 +1,1 @@
-ninja -C build && ./build/imgview
+ninja -C build && ./build/imgview aa
