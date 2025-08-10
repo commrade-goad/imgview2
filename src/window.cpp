@@ -39,11 +39,11 @@ std::optional<std::string> Window::initWindow() {
     if (!SDL_SetRenderVSync(mRenderer, 1))
     {
         std::snprintf(result.data(), result.size(),
-                "ERROR: Failed to set vsunc! SDL_Error: %s\n", SDL_GetError());
+                "ERROR: Failed to set vsync! SDL_Error: %s\n", SDL_GetError());
     };
 
-    if (result.size() > 0) return result;
-    else                   return std::nullopt;
+    if (strlen(result.data()) > 0) return result;
+    else                           return std::nullopt;
 }
 
 std::optional<std::pair<int, int>> Window::_getWindowSize() {

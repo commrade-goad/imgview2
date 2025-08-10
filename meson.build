@@ -14,7 +14,8 @@ imlib2 = dependency('imlib2', method: 'pkg-config')
 sdl3 = dependency('sdl3', method: 'pkg-config')
 
 infile = [
-  'src/main.cpp', 'src/window.cpp'
+  'src/main.cpp', 'src/window.cpp',
+  'src/argparse.cpp'
   ]
 
 executable(
