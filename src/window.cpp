@@ -67,16 +67,22 @@ void Window::startWindowLoops() {
     while (!mExit) {
         Uint64 frame_start = SDL_GetTicks();
 
-        future_time = SDL_GetTicksNS();
-        dt = future_time - current_time / 1000000;
-        current_time = future_time;
+        if (mFPS > 0)
+        {
+            future_time = SDL_GetTicksNS();
+            dt = future_time - current_time / 1000000;
+            current_time = future_time;
+        }
 
         _renderWindow();
         _handleWindowEvent(&event);
 
-        Uint64 frame_time = SDL_GetTicks() - frame_start;
-        if (frame_time < fps_delay) {
-            SDL_Delay(fps_delay - frame_time);
+        if (mFPS > 0)
+        {
+            Uint64 frame_time = SDL_GetTicks() - frame_start;
+            if (frame_time < fps_delay) {
+                SDL_Delay(fps_delay - frame_time);
+            }
         }
     }
 }

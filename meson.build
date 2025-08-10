@@ -10,8 +10,11 @@ project('imgview', 'cpp',
 )
 
 pname = 'imgview'
-imlib2 = dependency('imlib2', method: 'pkg-config')
+# imlib2 = dependency('imlib2', method: 'pkg-config')
 sdl3 = dependency('sdl3', method: 'pkg-config')
+deps = [
+  sdl3
+  ]
 
 infile = [
   'src/main.cpp', 'src/window.cpp',
@@ -21,7 +24,7 @@ infile = [
 executable(
   pname,
   infile,
-  dependencies: [imlib2, sdl3],
+  dependencies: deps,
   install : true,
   link_args : ['-lm']
 )
