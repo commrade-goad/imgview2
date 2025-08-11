@@ -2,7 +2,7 @@
 #include "window.h"
 #include "argparse.h"
 
-#include "state.h"
+#include "stateman.h"
 
 #define WINSIZE_X 1280
 #define WINSIZE_Y 720
@@ -16,9 +16,16 @@ int main(int argc, char **argv) {
     std::optional<std::string> fail = w.initWindow();
     if (fail.has_value()) std::cerr << fail.value();
 
-    State s(&w, opt.mInputFile[0].c_str());
-    if (s.mError >0) return -1;
+    StateManager sm = {};
 
-    w.startWindowLoops(&s);
+    State *s = new State(&w, opt.mInputFile[0].c_str());
+    if (s->mError >0) return -1;
+
+    size_t idx = sm.addState(s);
+    if (!sm.activeState(idx)) return -1;
+
+    w.startWindowLoops(&sm);
+
+    delete s;
     return 0;
 }

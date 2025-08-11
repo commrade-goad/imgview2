@@ -7,8 +7,8 @@ StateManager::StateManager() {
 
 State *StateManager::_searchState(const char *path, size_t *idx) {
     for (auto &s: mStates) {
-        if (strncmp(s.mPath, path, strlen(path)) == 0) {
-            return &s;
+        if (strncmp(s->mPath, path, strlen(path)) == 0) {
+            return s;
         }
         if (idx) *idx += 1;
     }
@@ -17,7 +17,7 @@ State *StateManager::_searchState(const char *path, size_t *idx) {
 
 bool StateManager::activeState(size_t idx) {
     if (idx < mStates.size()) {
-        mActive = &mStates[idx];
+        mActive = mStates[idx];
         return true;
     }
     return false;
@@ -32,7 +32,10 @@ bool StateManager::activeState(const char *path) {
     return false;
 }
 
-void StateManager::addState(State s) { mStates.push_back(s); }
+size_t StateManager::addState(State *s) {
+    mStates.push_back(s);
+    return mStates.size() - 1;
+}
 
 void StateManager::deleteState(const char *path) {
     size_t idx = 0;

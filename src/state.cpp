@@ -91,5 +91,6 @@ void State::renderImage(){
         static_cast<float>(mPos.first) , static_cast<float>(mPos.second),
         static_cast<float>(mTexture->w), static_cast<float>(mTexture->h)
     };
-    SDL_RenderTexture(mWindow->mRenderer, mTexture, NULL, &rec);
+    if (!SDL_RenderTexture(mWindow->mRenderer, mTexture, NULL, &rec))
+        SDL_Log("ERROR: Failed to render : %s\n", SDL_GetError());
 }

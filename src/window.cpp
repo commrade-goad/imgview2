@@ -1,7 +1,7 @@
 #include "window.h"
 
 #include <SDL3/SDL.h>
-#include "state.h"
+#include "stateman.h"
 
 Window::Window(size_t w, size_t h, size_t fps, const char *name) {
     mWidth = w;
@@ -74,12 +74,11 @@ static inline void handle_event(Window *w, SDL_Event *ev) {
     }
 }
 
-
-void Window::startWindowLoops(State *s) {
+void Window::startWindowLoops(StateManager *sm) {
     SDL_Event event;
 
     while (!mExit) {
-        _renderWindow(s);
+        _renderWindow(sm->mActive);
         handle_event(this, &event);
     }
 }
