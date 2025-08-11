@@ -22,6 +22,8 @@ class State {
         ~State();
 
         std::optional<std::string> setScaleMode(SDL_ScaleMode mode);
+        void renderImage();
+
     private:
         std::optional<std::string> _loadImage();
         void _stateInit(Window *win, const char *path, SDL_ScaleMode mode);

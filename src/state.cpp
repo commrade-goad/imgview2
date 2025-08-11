@@ -32,7 +32,6 @@ std::optional<std::string> State::setScaleMode(SDL_ScaleMode mode) {
 State::~State() { SDL_DestroyTexture(mTexture); }
 
 std::optional<std::string> State::_loadImage() {
-    return std::nullopt;
     std::string result;
     result.resize(512);
 
@@ -51,14 +50,21 @@ std::optional<std::string> State::_loadImage() {
 
     if (!surface) {
         snprintf(result.data(), result.size(),
-                 "ERROR: Failed to create the texture from image: %s\n", SDL_GetError());
+                 "ERROR: Failed to create the surface from image: %s\n", SDL_GetError());
         stbi_image_free(data);
         mError++;
         return result;
     }
 
-    mTexture = SDL_CreateTextureFromSurface(mWindow->mRenderer, surface);
+    SDL_Texture *text = SDL_CreateTextureFromSurface(mWindow->mRenderer, surface);
+    if (text) mTexture = text;
+    else {
+        snprintf(result.data(), result.size(),
+                 "ERROR: Failed to create the texture from image: %s\n", SDL_GetError());
+        mError++;
+    }
 
+    SDL_DestroySurface(surface);
     stbi_image_free(data);
     if (strlen(result.data()) > 0) return result;
     else                           return std::nullopt;
@@ -76,4 +82,14 @@ void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
     auto result = _loadImage();
     if (result.has_value())
         std::cerr << result.value();
+}
+
+
+void State::renderImage(){
+    if (!mTexture) return;
+    const SDL_FRect rec = SDL_FRect{
+        static_cast<float>(mPos.first) , static_cast<float>(mPos.second),
+        static_cast<float>(mTexture->w), static_cast<float>(mTexture->h)
+    };
+    SDL_RenderTexture(mWindow->mRenderer, mTexture, NULL, &rec);
 }

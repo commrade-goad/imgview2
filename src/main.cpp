@@ -19,6 +19,6 @@ int main(int argc, char **argv) {
     State s(&w, opt.mInputFile[0].c_str());
     if (s.mError >0) return -1;
 
-    w.startWindowLoops();
+    w.startWindowLoops(&s);
     return 0;
 }

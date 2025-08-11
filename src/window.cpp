@@ -1,6 +1,7 @@
 #include "window.h"
 
 #include <SDL3/SDL.h>
+#include "state.h"
 
 Window::Window(size_t w, size_t h, size_t fps, const char *name) {
     mWidth = w;
@@ -52,9 +53,12 @@ std::optional<std::pair<int, int>> Window::_getWindowSize() {
     return ret;
 }
 
-void Window::_renderWindow() {
+void Window::_renderWindow(State *s) {
     SDL_SetRenderDrawColor(mRenderer, 0x1e, 0x1e, 0x2e, 255);
     SDL_RenderClear(mRenderer);
+
+    s->renderImage();
+
     SDL_RenderPresent(mRenderer);
 }
 
@@ -71,31 +75,11 @@ static inline void handle_event(Window *w, SDL_Event *ev) {
 }
 
 
-void Window::startWindowLoops() {
+void Window::startWindowLoops(State *s) {
     SDL_Event event;
 
-    // Uint64 current_time = SDL_GetTicksNS();
-    // Uint64 future_time = SDL_GetTicksNS();
-
     while (!mExit) {
-        // Uint64 frame_start = SDL_GetTicks();
-        //
-        // if (mFPS > 0)
-        // {
-        //     future_time = SDL_GetTicksNS();
-        //     dt = future_time - current_time / 1000000;
-        //     current_time = future_time;
-        // }
-
-        _renderWindow();
+        _renderWindow(s);
         handle_event(this, &event);
-
-        // if (mFPS > 0)
-        // {
-        //     Uint64 frame_time = SDL_GetTicks() - frame_start;
-        //     if (frame_time < fps_delay) {
-        //         SDL_Delay(fps_delay - frame_time);
-        //     }
-        // }
     }
 }

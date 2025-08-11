@@ -4,6 +4,8 @@
 #include <SDL3/SDL.h>
 #include <optional>
 
+struct State;
+
 class Window {
     public:
         SDL_Renderer *mRenderer;
@@ -17,11 +19,8 @@ class Window {
 
         std::optional<std::string> initWindow();
         std::optional<std::string> resizeWindow(size_t newWidth, size_t newHeight);
-        void startWindowLoops();
+        void startWindowLoops(State *s);
     private:
-        size_t dt;
-        Uint64 fps_delay;
-
         std::optional<std::pair<int, int>> _getWindowSize();
-        void _renderWindow();
+        void _renderWindow(State *s);
 };

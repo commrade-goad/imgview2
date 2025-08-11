@@ -3,9 +3,7 @@ project('imgview', 'cpp',
   default_options : [
     'warning_level=3',
     'c++_std=c20',
-    'cpp_std=c20',
     'cxx_std=c20',
-    'optimization=3',
   ]
 )
 
