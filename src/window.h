@@ -24,5 +24,4 @@ class Window {
 
         std::optional<std::pair<int, int>> _getWindowSize();
         void _renderWindow();
-        void _handleWindowEvent(SDL_Event *event);
 };

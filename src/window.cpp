@@ -58,43 +58,44 @@ void Window::_renderWindow() {
     SDL_RenderPresent(mRenderer);
 }
 
-void Window::startWindowLoops() {
-    SDL_Event event;
-
-    Uint64 current_time = SDL_GetTicksNS();
-    Uint64 future_time = SDL_GetTicksNS();
-
-    while (!mExit) {
-        Uint64 frame_start = SDL_GetTicks();
-
-        if (mFPS > 0)
-        {
-            future_time = SDL_GetTicksNS();
-            dt = future_time - current_time / 1000000;
-            current_time = future_time;
-        }
-
-        _renderWindow();
-        _handleWindowEvent(&event);
-
-        if (mFPS > 0)
-        {
-            Uint64 frame_time = SDL_GetTicks() - frame_start;
-            if (frame_time < fps_delay) {
-                SDL_Delay(fps_delay - frame_time);
-            }
+static inline void handle_event(Window *w, SDL_Event *ev) {
+    while (SDL_PollEvent(ev)) {
+        switch (ev->type) {
+            case SDL_EVENT_QUIT:
+                w->mExit = true;
+                break;
+            default:
+                break;
         }
     }
 }
 
-void Window::_handleWindowEvent(SDL_Event *event) {
-    while (SDL_PollEvent(event)) {
-        switch (event->type) {
-            case SDL_EVENT_QUIT:
-                mExit = true;
-                return;
-            default:
-                return;
-        }
+
+void Window::startWindowLoops() {
+    SDL_Event event;
+
+    // Uint64 current_time = SDL_GetTicksNS();
+    // Uint64 future_time = SDL_GetTicksNS();
+
+    while (!mExit) {
+        // Uint64 frame_start = SDL_GetTicks();
+        //
+        // if (mFPS > 0)
+        // {
+        //     future_time = SDL_GetTicksNS();
+        //     dt = future_time - current_time / 1000000;
+        //     current_time = future_time;
+        // }
+
+        _renderWindow();
+        handle_event(this, &event);
+
+        // if (mFPS > 0)
+        // {
+        //     Uint64 frame_time = SDL_GetTicks() - frame_start;
+        //     if (frame_time < fps_delay) {
+        //         SDL_Delay(fps_delay - frame_time);
+        //     }
+        // }
     }
 }
