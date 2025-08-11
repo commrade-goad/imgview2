@@ -46,7 +46,7 @@ std::optional<std::string> State::_loadImage() {
     }
 
     SDL_Surface *surface =
-        SDL_CreateSurfaceFrom(x, y, SDL_PIXELFORMAT_BGRA32,
+        SDL_CreateSurfaceFrom(x, y, SDL_PIXELFORMAT_RGBA32,
                 data, x * 4);
 
     if (!surface) {
