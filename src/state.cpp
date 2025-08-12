@@ -81,7 +81,6 @@ void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
     mTextureLoaded = false;
 }
 
-
 void State::renderImage(){
     if (!mTexture) return;
     const SDL_FRect rec = SDL_FRect{
@@ -99,4 +98,9 @@ std::optional<std::string> State::loadTexture() {
         return result.value();
     mTextureLoaded = true;
     return std::nullopt;
+}
+
+void State::moveTexturePosBy(std::pair<int, int> n) {
+    mPos.first += n.first;
+    mPos.second += n.second;
 }

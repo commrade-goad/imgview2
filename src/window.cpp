@@ -63,13 +63,23 @@ void Window::_renderWindow(State *s) {
     SDL_RenderPresent(mRenderer);
 }
 
-static inline void handle_event(Window *w, SDL_Event *ev) {
+static inline void handle_event(Window *w, SDL_Event *ev, StateManager *sm) {
     // NOTE: Use this to get no delay with the event.
     const bool *key_state = SDL_GetKeyboardState(NULL);
     if (key_state[SDL_SCANCODE_ESCAPE]) {
         w->mExit = true;
         return;
     }
+
+    static const int increment = (int)(10 * (sm->mActive->mZoom / 100));
+    if (key_state[SDL_SCANCODE_H])
+        sm->mActive->moveTexturePosBy(std::pair<int, int>(increment, 0));
+    if (key_state[SDL_SCANCODE_J])
+        sm->mActive->moveTexturePosBy(std::pair<int, int>(0, -increment));
+    if (key_state[SDL_SCANCODE_K])
+        sm->mActive->moveTexturePosBy(std::pair<int, int>(0, increment));
+    if (key_state[SDL_SCANCODE_L])
+        sm->mActive->moveTexturePosBy(std::pair<int, int>(-increment, 0));
 
     while (SDL_PollEvent(ev)) {
         switch (ev->type) {
@@ -101,7 +111,7 @@ bool Window::startWindowLoops(StateManager *sm) {
 
     while (!mExit) {
         _renderWindow(sm->mActive);
-        handle_event(this, &event);
+        handle_event(this, &event, sm);
     }
 
     return true;

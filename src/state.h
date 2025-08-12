@@ -26,6 +26,8 @@ class State {
         void renderImage();
         std::optional<std::string> loadTexture();
 
+        void moveTexturePosBy(std::pair<int, int> n);
+
     private:
         std::optional<std::string> _loadImage();
         void _stateInit(Window *win, const char *path, SDL_ScaleMode mode);
