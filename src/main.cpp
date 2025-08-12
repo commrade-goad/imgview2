@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 #include "window.h"
 #include "argparse.h"
 #include "stateman.h"
@@ -18,14 +19,30 @@ int main(int argc, char **argv) {
     if (fail.has_value()) std::cerr << fail.value();
 
     StateManager sm = {};
+    std::thread smThread(&StateManager::mainLoop, &sm);
 
     for (auto &fileIn: opt.mInputFile) {
         int idx = sm.makeNewState(&w, fileIn.c_str());
-        if (idx < 0) return -1;
+        if (idx < 0) {
+            sm.stopLoop();
+            smThread.join();
+            return -1;
+        }
     }
 
-    if (!sm.activeteState(0ul)) return -1;
-    if (!w.startWindowLoops(&sm)) return -1;
+    if (!sm.activeteState(0ul)) {
+        sm.stopLoop();
+        smThread.join();
+        return -1;
+    }
+    if (!w.startWindowLoops(&sm)) {
+        sm.stopLoop();
+        smThread.join();
+        return -1;
+    }
+
+    sm.stopLoop();
+    smThread.join();
 
     return 0;
 }

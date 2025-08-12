@@ -10,8 +10,10 @@ project('imgview', 'cpp',
 pname = 'imgview'
 # imlib2 = dependency('imlib2', method: 'pkg-config')
 sdl3 = dependency('sdl3', method: 'pkg-config')
+pthread = dependency('threads')
 deps = [
-  sdl3
+  sdl3,
+  pthread
   ]
 
 infile = [

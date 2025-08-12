@@ -86,7 +86,10 @@ std::optional<std::string> State::createTexture() {
     SDL_DestroySurface(surface);
     stbi_image_free(mImageData.data);
     if (strlen(result.data()) > 0) return result;
-    else                           return std::nullopt;
+    else {
+        mTextureLoaded = true;
+        return std::nullopt;
+    }
 }
 
 void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {

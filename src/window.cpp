@@ -70,7 +70,7 @@ static inline void handle_event(Window *w, SDL_Event *ev, StateManager *sm) {
         return;
     }
 
-    static const int zoomIncrement = 10;
+    static const int zoomIncrement = 5;
     static const int movementIncrement = (int)(12 * (sm->mActive->mZoom / 100));
     if (key_state[SDL_SCANCODE_H])
         sm->mActive->moveTexturePosBy(std::pair<int, int>(movementIncrement, 0));

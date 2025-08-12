@@ -3,12 +3,19 @@
 #include "state.h"
 #include <queue>
 #include <vector>
+#include <atomic>
+
+struct Window;
 
 class StateManager {
     public:
         State *mActive;
         int mActiveIdx;
         std::vector<State *> mStates;
+        std::atomic<bool> mRunning {true};
+
+        // NOTE: Access using MUTEX!
+        std::mutex mMutex;
         std::queue<State *> mQueue;
 
         StateManager();
@@ -22,6 +29,9 @@ class StateManager {
         void deleteState(size_t idx);
         int makeNewState(Window *w, const char *path, SDL_ScaleMode scaleMode);
         int makeNewState(Window *w, const char *path);
+
+        void mainLoop();
+        void stopLoop();
 
     private:
         State *_searchState(const char *path, size_t *idx);

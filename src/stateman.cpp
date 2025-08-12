@@ -1,10 +1,12 @@
 #include "stateman.h"
 #include <iostream>
+#include <thread>
 
 StateManager::StateManager() {
     mActive = nullptr;
     mActiveIdx = -1;
     mStates.reserve(10);
+    mRunning = true;
 }
 
 StateManager::~StateManager() {
@@ -28,11 +30,7 @@ bool StateManager::activeteState(size_t idx) {
         mActive = mStates[idx];
         mActiveIdx = idx;
         if (!mActive->mTextureLoaded) {
-            auto status = mActive->loadEverythingSync();
-            if (status.has_value()) {
-                std::cerr << status.value();
-                return false;
-            }
+            mActive->createTexture();
         }
         return true;
     }
@@ -72,15 +70,57 @@ int StateManager::makeNewState(Window *w, const char *path) {
 }
 
 size_t StateManager::addState(State *s) {
-    // std::thread t(&State::moveTexturePosBy, &myState, std::make_pair(10, 5));
+    std::lock_guard<std::mutex> lock(mMutex);
+
     mStates.push_back(s);
+    mQueue.push(s);
+
     return mStates.size() - 1;
 }
 
 void StateManager::deleteState(const char *path) {
     size_t idx = 0;
-    if (_searchState(path, &idx)) {
+    if (auto state = _searchState(path, &idx)) {
         mStates.erase(mStates.begin() + idx);
+        delete state;
     }
 }
-void StateManager::deleteState(size_t idx) { mStates.erase(mStates.begin() + idx); }
+
+void StateManager::deleteState(size_t idx) {
+    mStates.erase(mStates.begin() + idx);
+}
+
+void StateManager::mainLoop() {
+    static const size_t maxThreadCount = 5;
+    std::atomic<size_t> threadCount  = 0;
+    threadCount = 0;
+    while (mRunning) {
+        State *s = nullptr;
+        {
+            std::unique_lock<std::mutex> lock(mMutex, std::try_to_lock);
+            if (!lock) break;
+            if (!mQueue.empty() && threadCount <= maxThreadCount) {
+                s = mQueue.front();
+                mQueue.pop();
+                ++threadCount;
+            }
+        }
+
+        if (s) {
+            std::thread worker([s, &threadCount]() {
+                    auto res = s->loadImage();
+                    if (res.has_value()) std::cerr << res.value();
+                    else std::cout << "[WORKER]: done processing " << s->mPath << std::endl;
+                    ++threadCount;
+                    return;
+                    });
+            worker.detach();
+            // worker.join();
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
+
+void StateManager::stopLoop() {
+    mRunning = false;
+}
