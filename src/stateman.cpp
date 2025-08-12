@@ -28,7 +28,7 @@ bool StateManager::activeteState(size_t idx) {
         mActive = mStates[idx];
         mActiveIdx = idx;
         if (!mActive->mTextureLoaded) {
-            auto status = mActive->loadTexture();
+            auto status = mActive->loadEverythingSync();
             if (status.has_value()) {
                 std::cerr << status.value();
                 return false;
@@ -46,7 +46,7 @@ bool StateManager::activeteState(const char *path) {
         mActiveIdx = idx;
         mActive = res;
         if (!mActive->mTextureLoaded) {
-            auto status = mActive->loadTexture();
+            auto status = mActive->loadEverythingSync();
             if (status.has_value()) {
                 std::cerr << status.value();
                 return false;
@@ -72,6 +72,7 @@ int StateManager::makeNewState(Window *w, const char *path) {
 }
 
 size_t StateManager::addState(State *s) {
+    // std::thread t(&State::moveTexturePosBy, &myState, std::make_pair(10, 5));
     mStates.push_back(s);
     return mStates.size() - 1;
 }

@@ -31,27 +31,46 @@ std::optional<std::string> State::setScaleMode(SDL_ScaleMode mode) {
 
 State::~State() { SDL_DestroyTexture(mTexture); }
 
-std::optional<std::string> State::_loadImage() {
+std::optional<std::string> State::loadImage() {
+    std::unique_lock<std::mutex> lock(mMutex, std::try_to_lock);
+    if (!lock) return std::nullopt;
+
     std::string result;
     result.resize(512);
 
-    int x, y, n;
-    unsigned char *data = stbi_load(mPath, &x, &y, &n, 4);
+    unsigned char *data = stbi_load(mPath, &mImageData.x, &mImageData.y, &mImageData.n, 4);
     if (!data) {
         snprintf(result.data(), result.size(),
                  "ERROR: Failed to load the image: %s\n", stbi_failure_reason());
         mError++;
         return result;
     }
+    mImageData.data = data;
+    return std::nullopt;
+}
+
+std::optional<std::string> State::createTexture() {
+    std::unique_lock<std::mutex> lock(mMutex, std::try_to_lock);
+    if (!lock) return std::nullopt;
+
+    std::string result;
+    result.resize(512);
+
+    if (!mImageData.data) {
+        snprintf(result.data(), result.size(),
+                 "ERROR: Image is not loaded! Can't make a texture from void!\n");
+        stbi_image_free(mImageData.data);
+        return result;
+    }
 
     SDL_Surface *surface =
-        SDL_CreateSurfaceFrom(x, y, SDL_PIXELFORMAT_RGBA32,
-                data, x * 4);
+        SDL_CreateSurfaceFrom(mImageData.x, mImageData.y, SDL_PIXELFORMAT_RGBA32,
+                mImageData.data, mImageData.x * 4);
 
     if (!surface) {
         snprintf(result.data(), result.size(),
                  "ERROR: Failed to create the surface from image: %s\n", SDL_GetError());
-        stbi_image_free(data);
+        stbi_image_free(mImageData.data);
         mError++;
         return result;
     }
@@ -65,7 +84,7 @@ std::optional<std::string> State::_loadImage() {
     }
 
     SDL_DestroySurface(surface);
-    stbi_image_free(data);
+    stbi_image_free(mImageData.data);
     if (strlen(result.data()) > 0) return result;
     else                           return std::nullopt;
 }
@@ -79,9 +98,10 @@ void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
     mWindow = win;
     mError = 0;
     mTextureLoaded = false;
+    mImageData = {};
 }
 
-void State::renderImage(){
+void State::renderTexture(){
     if (!mTexture) return;
     const SDL_FRect rec =
         SDL_FRect {
@@ -94,13 +114,17 @@ void State::renderImage(){
         std::cerr << "ERROR: Failed to render : " << SDL_GetError() << std::endl;
 }
 
-std::optional<std::string> State::loadTexture() {
-    // NOTE: just for testing
-    // if (mTextureLoaded) return std::string("ERROR: Texture already loaded!");
+std::optional<std::string> State::loadEverythingSync() {
     if (mTextureLoaded) return std::nullopt;
-    auto result = _loadImage();
+
+    auto result = loadImage();
     if (result.has_value())
         return result.value();
+
+    result = createTexture();
+    if (result.has_value())
+        return result.value();
+
     mTextureLoaded = true;
     return std::nullopt;
 }

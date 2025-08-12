@@ -57,7 +57,7 @@ void Window::_renderWindow(State *s) {
     SDL_SetRenderDrawColor(mRenderer, 0x1e, 0x1e, 0x2e, 255);
     SDL_RenderClear(mRenderer);
 
-    if (s->mTextureLoaded) s->renderImage();
+    if (s->mTextureLoaded) s->renderTexture();
 
     SDL_RenderPresent(mRenderer);
 }

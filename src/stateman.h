@@ -1,6 +1,7 @@
 #pragma once
 
 #include "state.h"
+#include <queue>
 #include <vector>
 
 class StateManager {
@@ -8,6 +9,7 @@ class StateManager {
         State *mActive;
         int mActiveIdx;
         std::vector<State *> mStates;
+        std::queue<State *> mQueue;
 
         StateManager();
         ~StateManager();

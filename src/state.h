@@ -4,6 +4,9 @@
 #include <string>
 #include <optional>
 #include <SDL3/SDL.h>
+#include <mutex>
+
+#include "image.h"
 
 struct Window;
 
@@ -18,18 +21,23 @@ class State {
         int mError;
         bool mTextureLoaded;
 
+        // NOTE: Access using mutex!
+        std::mutex mMutex;
+        Image mImageData;
+
         State(Window *win, const char *path, SDL_ScaleMode scaleMode);
         State(Window *win, const char *path);
         ~State();
 
         std::optional<std::string> setScaleMode(SDL_ScaleMode mode);
-        void renderImage();
-        std::optional<std::string> loadTexture();
+        void renderTexture();
+        std::optional<std::string> loadEverythingSync();
+        std::optional<std::string> loadImage();
+        std::optional<std::string> createTexture();
 
         void moveTexturePosBy(std::pair<int, int> n);
         void zoomTextureBy(int n);
 
     private:
-        std::optional<std::string> _loadImage();
         void _stateInit(Window *win, const char *path, SDL_ScaleMode mode);
 };
