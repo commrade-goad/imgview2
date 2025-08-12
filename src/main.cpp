@@ -18,14 +18,9 @@ int main(int argc, char **argv) {
 
     StateManager sm = {};
 
-    State *s = new State(&w, opt.mInputFile[0].c_str());
-    if (s->mError >0) return -1;
-
-    size_t idx = sm.addState(s);
+    int idx = sm.makeNewState(&w, opt.mInputFile[0].c_str());
     if (!sm.activeState(idx)) return -1;
+    if (!w.startWindowLoops(&sm)) return -1;
 
-    w.startWindowLoops(&sm);
-
-    delete s;
     return 0;
 }

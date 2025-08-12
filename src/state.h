@@ -16,6 +16,7 @@ class State {
         SDL_Texture *mTexture;
         SDL_ScaleMode mScaleMode;
         int mError;
+        bool mTextureLoaded;
 
         State(Window *win, const char *path, SDL_ScaleMode scaleMode);
         State(Window *win, const char *path);
@@ -23,6 +24,7 @@ class State {
 
         std::optional<std::string> setScaleMode(SDL_ScaleMode mode);
         void renderImage();
+        std::optional<std::string> loadTexture();
 
     private:
         std::optional<std::string> _loadImage();

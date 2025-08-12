@@ -78,10 +78,7 @@ void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
     mScaleMode = mode;
     mWindow = win;
     mError = 0;
-
-    auto result = _loadImage();
-    if (result.has_value())
-        std::cerr << result.value();
+    mTextureLoaded = false;
 }
 
 
@@ -92,5 +89,14 @@ void State::renderImage(){
         static_cast<float>(mTexture->w), static_cast<float>(mTexture->h)
     };
     if (!SDL_RenderTexture(mWindow->mRenderer, mTexture, NULL, &rec))
-        SDL_Log("ERROR: Failed to render : %s\n", SDL_GetError());
+        std::cerr << "ERROR: Failed to render : " << SDL_GetError() << std::endl;
+}
+
+std::optional<std::string> State::loadTexture() {
+    if (mTextureLoaded) return std::string("ERROR: Texture already loaded!");
+    auto result = _loadImage();
+    if (result.has_value())
+        return result.value();
+    mTextureLoaded = true;
+    return std::nullopt;
 }

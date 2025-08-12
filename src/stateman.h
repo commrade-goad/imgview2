@@ -9,7 +9,7 @@ class StateManager {
         std::vector<State *> mStates;
 
         StateManager();
-        ~StateManager() = default;
+        ~StateManager();
 
         bool activeState(size_t idx);
         bool activeState(const char *path);
@@ -17,6 +17,8 @@ class StateManager {
         size_t addState(State *s);
         void deleteState(const char *path);
         void deleteState(size_t idx);
+        int makeNewState(Window *w, const char *path, SDL_ScaleMode scaleMode);
+        int makeNewState(Window *w, const char *path);
 
     private:
         State *_searchState(const char *path, size_t *idx);

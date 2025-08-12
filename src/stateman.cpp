@@ -5,6 +5,12 @@ StateManager::StateManager() {
     mStates.reserve(10);
 }
 
+StateManager::~StateManager() {
+    for (auto &state: mStates) {
+        delete state;
+    }
+}
+
 State *StateManager::_searchState(const char *path, size_t *idx) {
     for (auto &s: mStates) {
         if (strncmp(s->mPath, path, strlen(path)) == 0) {
@@ -30,6 +36,20 @@ bool StateManager::activeState(const char *path) {
         return true;
     }
     return false;
+}
+
+int StateManager::makeNewState(Window *w, const char *path, SDL_ScaleMode scaleMode) {
+    State *s = new State(w, path, scaleMode);
+    if (s->mError >0) return -1;
+
+    return addState(s);
+}
+
+int StateManager::makeNewState(Window *w, const char *path) {
+    State *s = new State(w, path, SDL_SCALEMODE_NEAREST);
+    if (s->mError >0) return -1;
+
+    return addState(s);
 }
 
 size_t StateManager::addState(State *s) {

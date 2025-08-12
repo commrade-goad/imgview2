@@ -1,6 +1,7 @@
 #include "window.h"
 
 #include <SDL3/SDL.h>
+#include <iostream>
 #include "stateman.h"
 
 Window::Window(size_t w, size_t h, size_t fps, const char *name) {
@@ -57,7 +58,7 @@ void Window::_renderWindow(State *s) {
     SDL_SetRenderDrawColor(mRenderer, 0x1e, 0x1e, 0x2e, 255);
     SDL_RenderClear(mRenderer);
 
-    s->renderImage();
+    if (s->mTextureLoaded) s->renderImage();
 
     SDL_RenderPresent(mRenderer);
 }
@@ -74,11 +75,20 @@ static inline void handle_event(Window *w, SDL_Event *ev) {
     }
 }
 
-void Window::startWindowLoops(StateManager *sm) {
+bool Window::startWindowLoops(StateManager *sm) {
     SDL_Event event;
+
+    // NOTE: Alway try to load the first image.
+    auto status = sm->mActive->loadTexture();
+    if (status.has_value()) {
+        std::cerr << status.value();
+        return false;
+    }
 
     while (!mExit) {
         _renderWindow(sm->mActive);
         handle_event(this, &event);
     }
+
+    return true;
 }
