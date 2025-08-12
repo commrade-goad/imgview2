@@ -105,7 +105,12 @@ void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
 }
 
 void State::renderTexture(){
-    if (!mTexture) return;
+    // NOTE: Not loaded atleast try creating the texture.
+    if (!mTexture && !mTextureLoaded) {
+        if (mImageData.data) createTexture();
+        else return;
+    }
+
     const SDL_FRect rec =
         SDL_FRect {
             static_cast<float>(mPos.first),
