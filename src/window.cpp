@@ -1,7 +1,6 @@
 #include "window.h"
 
 #include <SDL3/SDL.h>
-#include <iostream>
 #include "stateman.h"
 
 Window::Window(size_t w, size_t h, size_t fps, const char *name) {
@@ -99,14 +98,12 @@ static inline void handle_event(Window *w, SDL_Event *ev, StateManager *sm) {
                     case SDLK_N:
                         {
                               size_t next = sm->mActiveIdx + 1;
-                              SDL_Log("window.cpp: next=%zu\n", next);
                               sm->activeteState(next);
                               break;
                         }
                     case SDLK_P:
                         {
                               size_t next = sm->mActiveIdx - 1;
-                              SDL_Log("window.cpp: next=%zu\n", next);
                               sm->activeteState(next);
                               break;
                         }
