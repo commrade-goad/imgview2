@@ -83,16 +83,21 @@ void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
 
 void State::renderImage(){
     if (!mTexture) return;
-    const SDL_FRect rec = SDL_FRect{
-        static_cast<float>(mPos.first) , static_cast<float>(mPos.second),
-        static_cast<float>(mTexture->w), static_cast<float>(mTexture->h)
-    };
+    const SDL_FRect rec =
+        SDL_FRect {
+            static_cast<float>(mPos.first),
+            static_cast<float>(mPos.second),
+            static_cast<float>(mTexture->w) * (mZoom / 100.0f),
+            static_cast<float>(mTexture->h) * (mZoom / 100.0f)
+        };
     if (!SDL_RenderTexture(mWindow->mRenderer, mTexture, NULL, &rec))
         std::cerr << "ERROR: Failed to render : " << SDL_GetError() << std::endl;
 }
 
 std::optional<std::string> State::loadTexture() {
-    if (mTextureLoaded) return std::string("ERROR: Texture already loaded!");
+    // NOTE: just for testing
+    // if (mTextureLoaded) return std::string("ERROR: Texture already loaded!");
+    if (mTextureLoaded) return std::nullopt;
     auto result = _loadImage();
     if (result.has_value())
         return result.value();
@@ -104,3 +109,5 @@ void State::moveTexturePosBy(std::pair<int, int> n) {
     mPos.first += n.first;
     mPos.second += n.second;
 }
+
+void State::zoomTextureBy(int n) { mZoom += n; }

@@ -6,13 +6,14 @@
 class StateManager {
     public:
         State *mActive;
+        int mActiveIdx;
         std::vector<State *> mStates;
 
         StateManager();
         ~StateManager();
 
-        bool activeState(size_t idx);
-        bool activeState(const char *path);
+        bool activeteState(size_t idx);
+        bool activeteState(const char *path);
 
         size_t addState(State *s);
         void deleteState(const char *path);

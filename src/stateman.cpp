@@ -1,7 +1,9 @@
 #include "stateman.h"
+#include <iostream>
 
 StateManager::StateManager() {
     mActive = nullptr;
+    mActiveIdx = -1;
     mStates.reserve(10);
 }
 
@@ -13,26 +15,43 @@ StateManager::~StateManager() {
 
 State *StateManager::_searchState(const char *path, size_t *idx) {
     for (auto &s: mStates) {
+        if (idx) *idx += 1;
         if (strncmp(s->mPath, path, strlen(path)) == 0) {
             return s;
         }
-        if (idx) *idx += 1;
     }
     return nullptr;
 }
 
-bool StateManager::activeState(size_t idx) {
+bool StateManager::activeteState(size_t idx) {
     if (idx < mStates.size()) {
         mActive = mStates[idx];
+        mActiveIdx = idx;
+        if (!mActive->mTextureLoaded) {
+            auto status = mActive->loadTexture();
+            if (status.has_value()) {
+                std::cerr << status.value();
+                return false;
+            }
+        }
         return true;
     }
     return false;
 }
 
 // NOTE: Worse than the idx... Please use it if necessary only.
-bool StateManager::activeState(const char *path) {
-    if (auto res = _searchState(path, nullptr)) {
+bool StateManager::activeteState(const char *path) {
+    size_t idx = -1;
+    if (auto res = _searchState(path, &idx)) {
+        mActiveIdx = idx;
         mActive = res;
+        if (!mActive->mTextureLoaded) {
+            auto status = mActive->loadTexture();
+            if (status.has_value()) {
+                std::cerr << status.value();
+                return false;
+            }
+        }
         return true;
     }
     return false;

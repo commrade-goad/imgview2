@@ -27,6 +27,7 @@ class State {
         std::optional<std::string> loadTexture();
 
         void moveTexturePosBy(std::pair<int, int> n);
+        void zoomTextureBy(int n);
 
     private:
         std::optional<std::string> _loadImage();

@@ -19,10 +19,12 @@ int main(int argc, char **argv) {
 
     StateManager sm = {};
 
-    int idx = sm.makeNewState(&w, opt.mInputFile[0].c_str());
-    if (idx < 0) return -1;
+    for (auto &fileIn: opt.mInputFile) {
+        int idx = sm.makeNewState(&w, fileIn.c_str());
+        if (idx < 0) return -1;
+    }
 
-    if (!sm.activeState(idx)) return -1;
+    if (!sm.activeteState(0ul)) return -1;
     if (!w.startWindowLoops(&sm)) return -1;
 
     return 0;
