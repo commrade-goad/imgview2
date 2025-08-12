@@ -1,1 +1,1 @@
-ninja -C build && ./build/imgview -x aa
+ninja -C build && ./build/imgview -x ruan-mei-cos.jpg

@@ -1,16 +1,16 @@
 #include <iostream>
 #include "window.h"
 #include "argparse.h"
-
 #include "stateman.h"
 
-#define WINAME "imgview"
+#define WINAME    "imgview"
 #define WINSIZE_X 1280
 #define WINSIZE_Y 720
 #define WINFPS    60
+#define MINARGS   2
 
 int main(int argc, char **argv) {
-    ProgramOpt opt(argc, argv, 2);
+    ProgramOpt opt(argc, argv, MINARGS);
     if (opt.mError > 0) return -1;
 
     Window w(WINSIZE_X, WINSIZE_Y, WINFPS, WINAME);

@@ -64,10 +64,24 @@ void Window::_renderWindow(State *s) {
 }
 
 static inline void handle_event(Window *w, SDL_Event *ev) {
+    // NOTE: Use this to get no delay with the event.
+    const bool *key_state = SDL_GetKeyboardState(NULL);
+    if (key_state[SDL_SCANCODE_ESCAPE]) {
+        w->mExit = true;
+        return;
+    }
+
     while (SDL_PollEvent(ev)) {
         switch (ev->type) {
             case SDL_EVENT_QUIT:
                 w->mExit = true;
+                break;
+            case SDL_EVENT_KEY_DOWN:
+                // NOTE: Use this if you want a delay with that key.
+                switch (ev->key.key) {
+                    default:
+                        break;
+                }
                 break;
             default:
                 break;
