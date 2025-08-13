@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
         smThread.join();
         return -1;
     }
+
     if (!w.startWindowLoop(&sm)) {
         sm.stopLoop();
         smThread.join();

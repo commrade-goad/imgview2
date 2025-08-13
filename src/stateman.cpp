@@ -84,6 +84,7 @@ void StateManager::deleteState(const char *path) {
 }
 
 void StateManager::deleteState(size_t idx) {
+    delete mStates[idx];
     mStates.erase(mStates.begin() + idx);
 }
 

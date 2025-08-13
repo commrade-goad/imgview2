@@ -15,6 +15,9 @@ class Window {
         const char *mTitle;
         bool mExit;
 
+        bool mCommandMode;
+        std::string mCommandBuff;
+
         Window(size_t w, size_t h, size_t fps, const char *name);
         ~Window();
 

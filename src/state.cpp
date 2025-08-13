@@ -41,7 +41,7 @@ std::optional<std::string> State::loadImage() {
     unsigned char *data = stbi_load(mPath, &mImageData.x, &mImageData.y, &mImageData.n, 4);
     if (!data) {
         snprintf(result.data(), result.size(),
-                 "ERROR: Failed to load the image: %s\n", stbi_failure_reason());
+                 "ERROR: Failed to load the image `%s`: %s\n", mPath, stbi_failure_reason());
         mError++;
         return result;
     }
@@ -95,10 +95,10 @@ std::optional<std::string> State::createTexture() {
 }
 void State::_regenerateRec() {
     mRec = SDL_FRect {
-        (float)(mRec.x),
-        (float)(mRec.y),
-        (float)(mTexture->w) * (mZoom / 100.0f),
-        (float)(mTexture->h) * (mZoom / 100.0f)
+        mRec.x,
+        mRec.y,
+        mTexture->w * (mZoom / 100.0f),
+        mTexture->h * (mZoom / 100.0f)
     };
 }
 
@@ -144,7 +144,6 @@ std::optional<std::string> State::loadEverythingSync() {
 void State::moveTexturePosBy(std::pair<int, int> n) {
     mRec.x += n.first;
     mRec.y += n.second;
-    _regenerateRec();
     mFitIn = false;
 }
 
