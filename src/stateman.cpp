@@ -31,6 +31,7 @@ bool StateManager::activateState(size_t idx) {
         if (!mActive->mTextureLoaded) {
             mActive->createTexture();
         }
+        if (mActive->mFitIn) mActive->fitTextureToWindow();
         return true;
     }
     return false;
@@ -43,12 +44,9 @@ bool StateManager::activateState(const char *path) {
         mActiveIdx = idx;
         mActive = res;
         if (!mActive->mTextureLoaded) {
-            auto status = mActive->loadEverythingSync();
-            if (status.has_value()) {
-                std::cerr << status.value();
-                return false;
-            }
+            mActive->createTexture();
         }
+        if (mActive->mFitIn) mActive->fitTextureToWindow();
         return true;
     }
     return false;
@@ -112,7 +110,7 @@ void StateManager::mainLoop() {
 
                 if (res.has_value()) std::cerr << res.value();
 
-                ++threadCount;
+                --threadCount;
                 return;
             });
             worker.detach();

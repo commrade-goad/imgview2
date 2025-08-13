@@ -47,9 +47,16 @@ std::optional<std::string> Window::initWindow() {
     else                           return std::nullopt;
 }
 
-std::optional<std::pair<int, int>> Window::_getWindowSize() {
+std::pair<int, int> Window::getWindowSize(std::string *err) {
     std::pair<int, int> ret;
-    if (!SDL_GetWindowSizeInPixels(mWindow, &ret.first, &ret.second)) return std::nullopt;
+    if (!SDL_GetWindowSizeInPixels(mWindow, &ret.first, &ret.second)) {
+        err->resize(512);
+        snprintf(
+                err->data(), err->size(),
+                "ERROR: Failed to get the window size! SDL Error: %s\n", SDL_GetError()
+                );
+        return std::pair<int, int>();
+    }
     return ret;
 }
 
@@ -87,6 +94,9 @@ static inline void handleEvent(Window *w, SDL_Event *ev, StateManager *sm) {
             case SDL_EVENT_QUIT:
                 w->mExit = true;
                 break;
+            case SDL_EVENT_WINDOW_RESIZED:
+                if (sm->mActive->mFitIn) sm->mActive->fitTextureToWindow();
+                break;
             case SDL_EVENT_KEY_DOWN:
                 // NOTE: Use this if you want a delay with that key.
                 switch (ev->key.key) {
@@ -95,6 +105,9 @@ static inline void handleEvent(Window *w, SDL_Event *ev, StateManager *sm) {
                         break;
                     case SDLK_EQUALS:
                         sm->mActive->zoomTextureBy(zoomIncrement);
+                        break;
+                    case SDLK_R:
+                        sm->mActive->fitTextureToWindow();
                         break;
                     case SDLK_N:
                         {

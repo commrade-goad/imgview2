@@ -13,7 +13,7 @@ std::optional<std::string> State::setScaleMode(SDL_ScaleMode mode) {
     std::string result;
     result.resize(512);
 
-    if (mTexture) {
+    if (mTexture && mTextureLoaded) {
         if (!SDL_SetTextureScaleMode(mTexture, mode)) {
             std::snprintf(result.data(), result.size(),
                     "ERROR: Failed to set texture scaling mode! SDL_Error: %s\n", SDL_GetError());
@@ -88,13 +88,22 @@ std::optional<std::string> State::createTexture() {
     if (strlen(result.data()) > 0) return result;
     else {
         mTextureLoaded = true;
+        _regenerateRec();
+        if (mFitIn) fitTextureToWindow();
         return std::nullopt;
     }
+}
+void State::_regenerateRec() {
+    mRec = SDL_FRect {
+        (float)(mRec.x),
+        (float)(mRec.y),
+        (float)(mTexture->w) * (mZoom / 100.0f),
+        (float)(mTexture->h) * (mZoom / 100.0f)
+    };
 }
 
 void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
     mPath = path;
-    mPos = std::pair<int, int>(0,0);
     mZoom = 100;
     mTexture = nullptr;
     mScaleMode = mode;
@@ -102,6 +111,8 @@ void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
     mError = 0;
     mTextureLoaded = false;
     mImageData = {};
+    mRec = {};
+    mFitIn = true;
 }
 
 void State::renderTexture(){
@@ -111,19 +122,12 @@ void State::renderTexture(){
         else return;
     }
 
-    const SDL_FRect rec =
-        SDL_FRect {
-            static_cast<float>(mPos.first),
-            static_cast<float>(mPos.second),
-            static_cast<float>(mTexture->w) * (mZoom / 100.0f),
-            static_cast<float>(mTexture->h) * (mZoom / 100.0f)
-        };
-    if (!SDL_RenderTexture(mWindow->mRenderer, mTexture, NULL, &rec))
+    if (!SDL_RenderTexture(mWindow->mRenderer, mTexture, NULL, &mRec))
         std::cerr << "ERROR: Failed to render : " << SDL_GetError() << std::endl;
 }
 
 std::optional<std::string> State::loadEverythingSync() {
-    if (mTextureLoaded) return std::nullopt;
+    if (mTextureLoaded && mTexture) return std::nullopt;
 
     auto result = loadImage();
     if (result.has_value())
@@ -138,8 +142,41 @@ std::optional<std::string> State::loadEverythingSync() {
 }
 
 void State::moveTexturePosBy(std::pair<int, int> n) {
-    mPos.first += n.first;
-    mPos.second += n.second;
+    mRec.x += n.first;
+    mRec.y += n.second;
+    _regenerateRec();
+    mFitIn = false;
 }
 
-void State::zoomTextureBy(int n) { mZoom += n; }
+void State::zoomTextureBy(int n) {
+    mZoom += n;
+    _regenerateRec();
+    mFitIn = false;
+}
+
+void State::fitTextureToWindow() {
+    if (!mWindow) return;
+
+    std::string err;
+    std::pair<int, int> windowSize = mWindow->getWindowSize(&err);
+    if (err.size() > 0) return;
+    
+    if (!mTexture && !mTextureLoaded) return;
+
+    double windowAspect = (double)windowSize.first / windowSize.second;
+    double imageAspect  = (double)mTexture->w / mTexture->h;
+
+    if (windowAspect < imageAspect) {
+        mRec.w = windowSize.first;
+        mRec.h = round(windowSize.first / imageAspect);
+    } else {
+        mRec.w = round(windowSize.second * imageAspect);
+        mRec.h = windowSize.second;
+    }
+
+    mRec.x = round((windowSize.first - mRec.w) / 2);
+    mRec.y = round((windowSize.second - mRec.h) / 2);
+
+    mZoom = round((mRec.w / mTexture->w) * 100);
+    mFitIn = true;
+}

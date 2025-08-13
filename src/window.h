@@ -20,8 +20,8 @@ class Window {
 
         std::optional<std::string> initWindow();
         std::optional<std::string> resizeWindow(size_t newWidth, size_t newHeight);
+        std::pair<int, int> getWindowSize(std::string *err);
         bool startWindowLoop(StateManager *s);
     private:
-        std::optional<std::pair<int, int>> _getWindowSize();
         void _renderWindow(State *s);
 };

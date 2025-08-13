@@ -14,12 +14,13 @@ class State {
     public:
         Window *mWindow;
         const char *mPath;
-        std::pair<int, int>mPos;
+        SDL_FRect mRec;
         int mZoom;
         SDL_Texture *mTexture;
         SDL_ScaleMode mScaleMode;
         int mError;
         bool mTextureLoaded;
+        bool mFitIn;
 
         // NOTE: Access using mutex!
         std::mutex mMutex;
@@ -37,7 +38,9 @@ class State {
 
         void moveTexturePosBy(std::pair<int, int> n);
         void zoomTextureBy(int n);
+        void fitTextureToWindow();
 
     private:
         void _stateInit(Window *win, const char *path, SDL_ScaleMode mode);
+        void _regenerateRec();
 };
