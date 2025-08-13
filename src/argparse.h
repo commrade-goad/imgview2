@@ -14,5 +14,5 @@ class ProgramOpt{
 
         ProgramOpt(int argc, char **argv, size_t min);
         ~ProgramOpt() = default;
-        std::optional<std::string> check_args(int argc, size_t min);
+        std::optional<std::string> checkArgs(int argc, size_t min);
 };

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstring>
 
-std::optional<std::string> ProgramOpt::check_args(int argc, size_t min) {
+std::optional<std::string> ProgramOpt::checkArgs(int argc, size_t min) {
     std::string buffer;
     buffer.resize(512);
     if (argc < (int)min) {
@@ -18,7 +18,7 @@ ProgramOpt::ProgramOpt(int argc, char **argv, size_t min) {
     mCheckWayland = true;
     mWindowSize = std::pair<size_t, size_t> (1280, 720);
 
-    auto status = check_args(argc, min);
+    auto status = checkArgs(argc, min);
     if (status.has_value()) {
         std::cerr << status.value();
         mError++;

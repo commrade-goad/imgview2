@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     std::thread smThread(&StateManager::mainLoop, &sm);
 
     for (auto &fileIn: opt.mInputFile) {
-        int idx = sm.makeNewState(&w, fileIn.c_str());
+        int idx = sm.newState(&w, fileIn.c_str());
         if (idx < 0) {
             sm.stopLoop();
             smThread.join();
@@ -30,12 +30,12 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (!sm.activeteState(0ul)) {
+    if (!sm.activateState(0ul)) {
         sm.stopLoop();
         smThread.join();
         return -1;
     }
-    if (!w.startWindowLoops(&sm)) {
+    if (!w.startWindowLoop(&sm)) {
         sm.stopLoop();
         smThread.join();
         return -1;

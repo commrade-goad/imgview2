@@ -63,7 +63,7 @@ void Window::_renderWindow(State *s) {
     SDL_RenderPresent(mRenderer);
 }
 
-static inline void handle_event(Window *w, SDL_Event *ev, StateManager *sm) {
+static inline void handleEvent(Window *w, SDL_Event *ev, StateManager *sm) {
     // NOTE: Use this to get no delay with the event.
     const bool *key_state = SDL_GetKeyboardState(NULL);
     if (key_state[SDL_SCANCODE_ESCAPE]) {
@@ -99,13 +99,13 @@ static inline void handle_event(Window *w, SDL_Event *ev, StateManager *sm) {
                     case SDLK_N:
                         {
                               size_t next = sm->mActiveIdx + 1;
-                              sm->activeteState(next);
+                              sm->activateState(next);
                               break;
                         }
                     case SDLK_P:
                         {
                               size_t next = sm->mActiveIdx - 1;
-                              sm->activeteState(next);
+                              sm->activateState(next);
                               break;
                         }
                     default:
@@ -118,12 +118,12 @@ static inline void handle_event(Window *w, SDL_Event *ev, StateManager *sm) {
     }
 }
 
-bool Window::startWindowLoops(StateManager *sm) {
+bool Window::startWindowLoop(StateManager *sm) {
     SDL_Event event;
 
     while (!mExit) {
         _renderWindow(sm->mActive);
-        handle_event(this, &event, sm);
+        handleEvent(this, &event, sm);
     }
 
     return true;

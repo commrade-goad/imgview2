@@ -15,17 +15,16 @@ StateManager::~StateManager() {
     }
 }
 
-State *StateManager::_searchState(const char *path, size_t *idx) {
+State *StateManager::_searchState(const char *path, int *idx) {
+    if (idx) *idx = -1;
     for (auto &s: mStates) {
         if (idx) *idx += 1;
-        if (strncmp(s->mPath, path, strlen(path)) == 0) {
-            return s;
-        }
+        if (strcmp(s->mPath, path) == 0) { return s; }
     }
     return nullptr;
 }
 
-bool StateManager::activeteState(size_t idx) {
+bool StateManager::activateState(size_t idx) {
     if (idx < mStates.size()) {
         mActive = mStates[idx];
         mActiveIdx = idx;
@@ -38,8 +37,8 @@ bool StateManager::activeteState(size_t idx) {
 }
 
 // NOTE: Worse than the idx... Please use it if necessary only.
-bool StateManager::activeteState(const char *path) {
-    size_t idx = -1;
+bool StateManager::activateState(const char *path) {
+    int idx = -1;
     if (auto res = _searchState(path, &idx)) {
         mActiveIdx = idx;
         mActive = res;
@@ -55,14 +54,14 @@ bool StateManager::activeteState(const char *path) {
     return false;
 }
 
-int StateManager::makeNewState(Window *w, const char *path, SDL_ScaleMode scaleMode) {
+int StateManager::newState(Window *w, const char *path, SDL_ScaleMode scaleMode) {
     State *s = new State(w, path, scaleMode);
     if (s->mError >0) return -1;
 
     return addState(s);
 }
 
-int StateManager::makeNewState(Window *w, const char *path) {
+int StateManager::newState(Window *w, const char *path) {
     State *s = new State(w, path, SDL_SCALEMODE_NEAREST);
     if (s->mError >0) return -1;
 
@@ -79,7 +78,7 @@ size_t StateManager::addState(State *s) {
 }
 
 void StateManager::deleteState(const char *path) {
-    size_t idx = 0;
+    int idx = -1;
     if (auto state = _searchState(path, &idx)) {
         mStates.erase(mStates.begin() + idx);
         delete state;
@@ -91,6 +90,7 @@ void StateManager::deleteState(size_t idx) {
 }
 
 void StateManager::mainLoop() {
+    static const size_t delayMs = 30;
     static const size_t maxThreadCount = 5;
     std::atomic<size_t> threadCount  = 0;
     threadCount = 0;
@@ -99,7 +99,7 @@ void StateManager::mainLoop() {
         {
             std::unique_lock<std::mutex> lock(mMutex, std::try_to_lock);
             if (!lock) break;
-            if (!mQueue.empty() && threadCount <= maxThreadCount) {
+            if (!mQueue.empty() && threadCount < maxThreadCount) {
                 s = mQueue.front();
                 mQueue.pop();
                 ++threadCount;
@@ -108,16 +108,16 @@ void StateManager::mainLoop() {
 
         if (s) {
             std::thread worker([s, &threadCount]() {
-                    auto res = s->loadImage();
-                    if (res.has_value()) std::cerr << res.value();
-                    else std::cout << "[WORKER]: done processing " << s->mPath << std::endl;
-                    ++threadCount;
-                    return;
-                    });
+                auto res = s->loadImage();
+
+                if (res.has_value()) std::cerr << res.value();
+
+                ++threadCount;
+                return;
+            });
             worker.detach();
-            // worker.join();
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
     }
 }
 
