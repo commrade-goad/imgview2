@@ -24,9 +24,12 @@ int main(int argc, char **argv) {
     for (auto &fileIn: opt.mInputFile) {
         int idx = sm.newState(&w, fileIn.c_str());
         if (idx < 0) {
+            continue;
+            /*
             sm.stopLoop();
             smThread.join();
             return -1;
+            */
         }
     }
 

@@ -1,8 +1,10 @@
 #define STB_IMAGE_IMPLEMENTATION
+#define MAGICIAN_IMPLEMENTATION
 
 #include "state.h"
 #include "window.h"
 #include "stb_image.h"
+#include "magician.h"
 
 #include <iostream>
 
@@ -38,7 +40,9 @@ std::optional<std::string> State::loadImage() {
     std::string result;
     result.resize(512);
 
-    unsigned char *data = stbi_load(mPath, &mImageData.x, &mImageData.y, &mImageData.n, 4);
+    if (!mImageData.mFileHandler) return std::nullopt;
+
+    unsigned char *data = stbi_load_from_file(mImageData.mFileHandler, &mImageData.x, &mImageData.y, &mImageData.n, 4);
     if (!data) {
         snprintf(result.data(), result.size(),
                  "ERROR: Failed to load the image `%s`: %s\n", mPath, stbi_failure_reason());
@@ -46,6 +50,8 @@ std::optional<std::string> State::loadImage() {
         return result;
     }
     mImageData.data = data;
+    fclose(mImageData.mFileHandler);
+
     return std::nullopt;
 }
 
@@ -113,6 +119,25 @@ void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
     mImageData = {};
     mRec = {};
     mFitIn = true;
+
+    // Try to load the file
+    mImageData.mFileHandler = fopen(path, "rb");
+    if (!mImageData.mFileHandler) {
+        std::cerr
+            << "ERROR: Failed to open the file `"
+            << path << "` : "
+            << strerror(errno) << std::endl;
+        mError++;
+    }
+    // Check type
+    if (!is_png(mImageData.mFileHandler) &&
+        !is_jpeg(mImageData.mFileHandler))
+    {
+        std::cerr
+            << "ERROR: unsupported format for file `"
+            << path << "`." << std::endl;
+        mError++;
+    }
 }
 
 void State::renderTexture(){

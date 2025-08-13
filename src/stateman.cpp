@@ -54,14 +54,20 @@ bool StateManager::activateState(const char *path) {
 
 int StateManager::newState(Window *w, const char *path, SDL_ScaleMode scaleMode) {
     State *s = new State(w, path, scaleMode);
-    if (s->mError >0) return -1;
+    if (s->mError > 0) {
+        delete s;
+        return -1;
+    };
 
     return addState(s);
 }
 
 int StateManager::newState(Window *w, const char *path) {
     State *s = new State(w, path, SDL_SCALEMODE_LINEAR);
-    if (s->mError >0) return -1;
+    if (s->mError > 0) {
+        delete s;
+        return -1;
+    };
 
     return addState(s);
 }
