@@ -6,19 +6,19 @@
 
 #include <iostream>
 
-State::State(Window *w, const char *path) { _stateInit(w, path, SDL_SCALEMODE_NEAREST); }
+State::State(Window *w, const char *path) { _stateInit(w, path, SDL_SCALEMODE_LINEAR); }
 State::State(Window *w, const char *path, SDL_ScaleMode scaleMode) { _stateInit(w, path, scaleMode); }
 
 std::optional<std::string> State::setScaleMode(SDL_ScaleMode mode) {
     std::string result;
     result.resize(512);
 
-    if (mTexture && mTextureLoaded) {
+    if (mTextureLoaded) {
         if (!SDL_SetTextureScaleMode(mTexture, mode)) {
             std::snprintf(result.data(), result.size(),
                     "ERROR: Failed to set texture scaling mode! SDL_Error: %s\n", SDL_GetError());
             mError++;
-        }
+        } else mScaleMode = mode;
     } else {
         std::snprintf(result.data(), result.size(),
                 "ERROR: Texture is not initialized!");
@@ -150,7 +150,15 @@ void State::moveTexturePosBy(std::pair<int, int> n) {
 
 void State::zoomTextureBy(int n) {
     mZoom += n;
+    SDL_FRect oldRec = mRec;
     _regenerateRec();
+
+    double wDiff = mRec.w - oldRec.w;
+    double hDiff = mRec.h - oldRec.h;
+
+    mRec.x -= wDiff / 2.0f;
+    mRec.y -= hDiff / 2.0f;
+
     mFitIn = false;
 }
 

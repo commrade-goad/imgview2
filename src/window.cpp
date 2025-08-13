@@ -1,6 +1,7 @@
 #include "window.h"
 
 #include <SDL3/SDL.h>
+#include <iostream>
 #include "stateman.h"
 
 Window::Window(size_t w, size_t h, size_t fps, const char *name) {
@@ -109,17 +110,27 @@ static inline void handleEvent(Window *w, SDL_Event *ev, StateManager *sm) {
                     case SDLK_R:
                         sm->mActive->fitTextureToWindow();
                         break;
+                    case SDLK_S:
+                        {
+                            SDL_ScaleMode scaleMode =
+                                sm->mActive->mScaleMode == SDL_SCALEMODE_LINEAR
+                                ? SDL_SCALEMODE_NEAREST
+                                : SDL_SCALEMODE_LINEAR;
+                            auto result = sm->mActive->setScaleMode(scaleMode);
+                            if (result.has_value()) std::cerr << result.value();
+                            break;
+                        }
                     case SDLK_N:
                         {
-                              size_t next = sm->mActiveIdx + 1;
-                              sm->activateState(next);
-                              break;
+                            size_t next = sm->mActiveIdx + 1;
+                            sm->activateState(next);
+                            break;
                         }
                     case SDLK_P:
                         {
-                              size_t next = sm->mActiveIdx - 1;
-                              sm->activateState(next);
-                              break;
+                            size_t next = sm->mActiveIdx - 1;
+                            sm->activateState(next);
+                            break;
                         }
                     default:
                         break;
@@ -134,9 +145,19 @@ static inline void handleEvent(Window *w, SDL_Event *ev, StateManager *sm) {
 bool Window::startWindowLoop(StateManager *sm) {
     SDL_Event event;
 
+    Uint64 FPSDelay = 1000 / mFPS;
+
     while (!mExit) {
+
+        Uint64 frameStart = SDL_GetTicks();
+
         _renderWindow(sm->mActive);
         handleEvent(this, &event, sm);
+
+        Uint64 frameTime = SDL_GetTicks() - frameStart;
+        if (frameTime < FPSDelay) {
+            SDL_Delay(FPSDelay - frameTime);
+        }
     }
 
     return true;
