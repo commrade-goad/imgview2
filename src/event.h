@@ -9,14 +9,31 @@
 
 static inline void handleKeyCommand(Window *w, StateManager *sm, SDL_Event *ev) {
     switch (ev->key.key) {
+        case SDLK_RETURN:
+        case SDLK_ESCAPE:
         case SDLK_SEMICOLON:
             {
                 std::cerr << "Exiting command mode..." << std::endl;
+                std::cout << w->mCommandBuff << std::endl;
                 w->mCommandMode = false;
                 w->mCommandBuff.clear();
                 break;
             }
+        case SDLK_BACKSPACE:
+            if (!w->mCommandBuff.empty()) w->mCommandBuff.pop_back();
+            break;
         default:
+            if ((ev->key.key >= SDLK_0 && ev->key.key <= SDLK_9) ||
+                (ev->key.key >= SDLK_A && ev->key.key <= SDLK_Z) ||
+                ev->key.key == SDLK_SPACE
+               ) {
+                bool shift   = (ev->key.mod & SDL_KMOD_SHIFT) != 0;
+                bool caps    = (ev->key.mod & SDL_KMOD_CAPS)  != 0;
+                bool uppercase = shift ^ caps;
+
+                const char theChar = uppercase ? toupper((char)ev->key.key) : (char)ev->key.key;
+                w->mCommandBuff.push_back(theChar);
+            }
             break;
     }
 }
@@ -68,10 +85,6 @@ static inline void handleKeyNormal(Window *w, StateManager *sm, SDL_Event *ev) {
 
 static inline void handleEvent(Window *w, SDL_Event *ev, StateManager *sm) {
     const bool *key_state = SDL_GetKeyboardState(NULL);
-    if (key_state[SDL_SCANCODE_ESCAPE]) {
-        w->mExit = true;
-        return;
-    }
 
     if (!w->mCommandMode) {
         static const int movementIncrement = (int)(MOVEMENT_INCREMENT * (sm->mActive->mZoom / 100));
