@@ -7,6 +7,7 @@
 #define ZOOM_INCREMENT 5
 #define MOVEMENT_INCREMENT 12
 
+/*
 static inline void handleKeyCommand(Window *w, StateManager *sm, SDL_Event *ev) {
     switch (ev->key.key) {
         case SDLK_RETURN:
@@ -37,6 +38,7 @@ static inline void handleKeyCommand(Window *w, StateManager *sm, SDL_Event *ev) 
             break;
     }
 }
+*/
 
 static inline void handleKeyNormal(Window *w, StateManager *sm, SDL_Event *ev) {
     switch (ev->key.key) {
@@ -71,6 +73,7 @@ static inline void handleKeyNormal(Window *w, StateManager *sm, SDL_Event *ev) {
                 sm->activateState(next);
                 break;
             }
+            /*
         case SDLK_SEMICOLON:
             {
                 std::cerr << "Entering command mode..." << std::endl;
@@ -78,6 +81,7 @@ static inline void handleKeyNormal(Window *w, StateManager *sm, SDL_Event *ev) {
                 w->mCommandBuff.clear();
                 break;
             }
+            */
         default:
             break;
     }
@@ -86,17 +90,16 @@ static inline void handleKeyNormal(Window *w, StateManager *sm, SDL_Event *ev) {
 static inline void handleEvent(Window *w, SDL_Event *ev, StateManager *sm) {
     const bool *key_state = SDL_GetKeyboardState(NULL);
 
-    if (!w->mCommandMode) {
-        static const int movementIncrement = (int)(MOVEMENT_INCREMENT * (sm->mActive->mZoom / 100));
-        if (key_state[SDL_SCANCODE_H])
-            sm->mActive->moveTexturePosBy(std::pair<int, int>(movementIncrement, 0));
-        if (key_state[SDL_SCANCODE_J])
-            sm->mActive->moveTexturePosBy(std::pair<int, int>(0, -movementIncrement));
-        if (key_state[SDL_SCANCODE_K])
-            sm->mActive->moveTexturePosBy(std::pair<int, int>(0, movementIncrement));
-        if (key_state[SDL_SCANCODE_L])
-            sm->mActive->moveTexturePosBy(std::pair<int, int>(-movementIncrement, 0));
-    }
+    // NOTE: If you decide to add command mode wrap this in if!
+    static const int movementIncrement = (int)(MOVEMENT_INCREMENT * (sm->mActive->mZoom / 100));
+    if (key_state[SDL_SCANCODE_H])
+        sm->mActive->moveTexturePosBy(std::pair<int, int>(movementIncrement, 0));
+    if (key_state[SDL_SCANCODE_J])
+        sm->mActive->moveTexturePosBy(std::pair<int, int>(0, -movementIncrement));
+    if (key_state[SDL_SCANCODE_K])
+        sm->mActive->moveTexturePosBy(std::pair<int, int>(0, movementIncrement));
+    if (key_state[SDL_SCANCODE_L])
+        sm->mActive->moveTexturePosBy(std::pair<int, int>(-movementIncrement, 0));
 
     while (SDL_PollEvent(ev)) {
         bool keyDown = false;
@@ -115,7 +118,7 @@ static inline void handleEvent(Window *w, SDL_Event *ev, StateManager *sm) {
         }
 
         if (!keyDown) continue;
-        if (w->mCommandMode) handleKeyCommand(w, sm, ev);
+        // if (w->mCommandMode) handleKeyCommand(w, sm, ev);
         else                 handleKeyNormal(w, sm, ev);
     }
 }
