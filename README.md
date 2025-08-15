@@ -44,6 +44,7 @@ mkdir build && cd build
 
 2. Build the project
 ```sh
+cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j$(nproc)
 ```
 
