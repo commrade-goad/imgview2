@@ -40,9 +40,9 @@ std::optional<std::string> State::loadImage() {
     std::string result;
     result.resize(512);
 
-    if (!mImageData.mFileHandler) return std::nullopt;
+    if (!mImageData.file_handler) return std::nullopt;
 
-    unsigned char *data = stbi_load_from_file(mImageData.mFileHandler, &mImageData.x, &mImageData.y, &mImageData.n, 4);
+    unsigned char *data = stbi_load_from_file(mImageData.file_handler, &mImageData.x, &mImageData.y, &mImageData.n, 4);
     if (!data) {
         snprintf(result.data(), result.size(),
                  "ERROR: Failed to load the image `%s`: %s\n", mPath, stbi_failure_reason());
@@ -50,7 +50,7 @@ std::optional<std::string> State::loadImage() {
         return result;
     }
     mImageData.data = data;
-    fclose(mImageData.mFileHandler);
+    fclose(mImageData.file_handler);
 
     return std::nullopt;
 }
@@ -121,8 +121,8 @@ void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
     mFitIn = true;
 
     // Try to load the file
-    mImageData.mFileHandler = fopen(path, "rb");
-    if (!mImageData.mFileHandler) {
+    mImageData.file_handler= fopen(path, "rb");
+    if (!mImageData.file_handler) {
         std::cerr
             << "ERROR: Failed to open the file `"
             << path << "` : "
@@ -130,8 +130,8 @@ void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
         mError++;
     }
     // Check type
-    if (!is_png(mImageData.mFileHandler) &&
-        !is_jpeg(mImageData.mFileHandler))
+    if (!is_png(mImageData.file_handler) &&
+        !is_jpeg(mImageData.file_handler))
     {
         std::cerr
             << "ERROR: unsupported format for file `"
