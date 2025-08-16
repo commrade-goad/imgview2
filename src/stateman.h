@@ -30,7 +30,7 @@ class StateManager {
         int newState(Window *w, const char *path, SDL_ScaleMode scaleMode);
         int newState(Window *w, const char *path);
 
-        void mainLoop();
+        void mainLoop(size_t maxThreadCount);
         void stopLoop();
 
     private:

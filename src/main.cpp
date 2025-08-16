@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
     if (fail.has_value()) std::cerr << fail.value();
 
     StateManager sm = {};
-    std::thread smThread(&StateManager::mainLoop, &sm);
+    std::thread smThread(&StateManager::mainLoop, &sm, opt.mThreadCount);
 
     for (auto &fileIn: opt.mInputFile) {
         int idx = sm.newState(&w, fileIn.c_str());

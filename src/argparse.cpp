@@ -25,6 +25,7 @@ ProgramOpt::ProgramOpt(int argc, char **argv, size_t min) {
     }
 
     bool capture_mode = false;
+    char flag = '\0';
 
     for (int i = 1; i < argc; i++) {
         char *current = argv[i];
@@ -38,6 +39,11 @@ ProgramOpt::ProgramOpt(int argc, char **argv, size_t min) {
                     break;
                 case 'w':
                     capture_mode = true;
+                    flag = 'w';
+                    break;
+                case 'j':
+                    capture_mode = true;
+                    flag = 'j';
                     break;
                 default:
                     std::cerr << "ERROR: Unknown option: " << current[j] << std::endl;
@@ -51,29 +57,45 @@ ProgramOpt::ProgramOpt(int argc, char **argv, size_t min) {
                 continue;
             }
 
-            int xpos = -1;
-            for (int j = 0; j < (int)current_len; j++) {
-                if (current[j] == 'x') {
-                    xpos = j;
+            switch (flag) {
+                case 'w':
+                    {
+                        int xpos = -1;
+                        for (int j = 0; j < (int)current_len; j++) {
+                            if (current[j] == 'x') {
+                                xpos = j;
+                                break;
+                            }
+                        }
+
+                        if (xpos < 0) {
+                            std::cerr << "ERROR: Not a valid WxH format.\n";
+                            mError++;
+                        }
+
+                        size_t rside = atoll(current + (xpos + 1));
+                        current[xpos] = '\0';
+                        size_t lside = atoll(current);
+                        current[xpos] = 'x';
+
+                        mWindowSize =
+                            std::pair<int, int>(
+                                    lside > 100 ? lside : 1280,
+                                    rside > 100 ? rside : 720
+                                    );
+                        flag = '\0';
+                        break;
+                    }
+                case 'j':
+                    {
+                        mThreadCount = atol(current);
+                        flag = '\0';
+                        break;
+                    }
+
+                default:
                     break;
-                }
             }
-
-            if (xpos < 0) {
-                std::cerr << "ERROR: Not a valid WxH format.\n";
-                mError++;
-            }
-
-            size_t rside = atoll(current + (xpos + 1));
-            current[xpos] = '\0';
-            size_t lside = atoll(current);
-            current[xpos] = 'x';
-
-            mWindowSize =
-                std::pair<int, int>(
-                    lside > 100 ? lside : 1280,
-                    rside > 100 ? rside : 720
-                );
             capture_mode = false;
         }
     }

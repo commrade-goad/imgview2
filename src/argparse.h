@@ -9,6 +9,7 @@ class ProgramOpt{
     public:
         int mError;
         bool mCheckWayland;
+        size_t mThreadCount;
         std::pair<int, int> mWindowSize;
         std::vector<std::string> mInputFile;
 

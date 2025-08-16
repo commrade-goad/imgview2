@@ -6,5 +6,5 @@ class Image {
     public:
         int x, y, n;
         unsigned char *data;
-        FILE *mFileHandler;
+        FILE *file_handler;
 };

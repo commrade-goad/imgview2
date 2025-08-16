@@ -82,21 +82,24 @@ size_t StateManager::addState(State *s) {
 }
 
 void StateManager::deleteState(const char *path) {
+    std::lock_guard<std::mutex> lock(mMutex);
     int idx = -1;
     if (auto state = _searchState(path, &idx)) {
+        // TODO: Delete inside the queue too.
         mStates.erase(mStates.begin() + idx);
         delete state;
     }
 }
 
 void StateManager::deleteState(size_t idx) {
+    std::lock_guard<std::mutex> lock(mMutex);
+    // TODO: Delete inside the queue too.
     delete mStates[idx];
     mStates.erase(mStates.begin() + idx);
 }
 
-void StateManager::mainLoop() {
+void StateManager::mainLoop(size_t maxThreadCount) {
     static const size_t delayMs = 30;
-    static const size_t maxThreadCount = 5;
     std::atomic<size_t> threadCount  = 0;
     threadCount = 0;
     while (mRunning) {
