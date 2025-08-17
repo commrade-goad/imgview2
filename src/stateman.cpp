@@ -33,18 +33,33 @@ bool StateManager::activateState(size_t idx) {
         size_t before = std::clamp(mActiveIdx - 3, 0, (int)mStates.size());
         size_t after  = std::clamp(mActiveIdx + 3, 0, (int)mStates.size());
 
-        for (size_t i = 0; i < mStates.size(); i++) {
-            if ((i >= before && i <= after) || mActive->mPath == mStates[i]->mPath) {
-                if (!mStates[i]->mImageDataLoaded)
-                    addToQueue(mStates[i]);
-            } else {
-                if (mActiveIdx == 0) continue;
+        if (mActiveIdx > 0){
+            for (size_t i = 0; i < before; i++) {
                 mStates[i]->resetTextureAndImage();
             }
+            for (size_t i = after; i < mStates.size(); ++i) {
+                mStates[i]->resetTextureAndImage();
+            }
+        } 
+
+        for (size_t i = before; i < after; i++) {
+            if (!mStates[i]->mImageDataLoaded && mStates[i]->mPath != mActive->mPath)
+                addToStack(mStates[i]);
         }
 
-        // if (!mActive->mImageDataLoaded)
-        //     addToQueue(mActive);
+        if (!mActive->mImageDataLoaded)
+            addToStack(mActive);
+
+        // for (size_t i = 0; i < mStates.size(); i++) {
+        //     if ((i >= before && i <= after) || mActive->mPath == mStates[i]->mPath) {
+        //         if (!mStates[i]->mImageDataLoaded)
+        //             addToStack(mStates[i]);
+        //     } else {
+        //         if (mActiveIdx <= 0) continue;
+        //         mStates[i]->resetTextureAndImage();
+        //     }
+        // }
+
         if (!mActive->mTextureLoaded) {
             mActive->createTexture();
         }
@@ -80,13 +95,13 @@ size_t StateManager::addState(State *s) {
     return mStates.size() - 1;
 }
 
-void StateManager::addToQueue(State *s) {
+void StateManager::addToStack(State *s) {
     std::lock_guard<std::mutex> lock(mMutex);
-    auto exists = std::find_if(mQueue.begin(), mQueue.end(),
+    auto exists = std::find_if(mStack.begin(), mStack.end(),
             [&](State* st) { return st->mPath == s->mPath; });
 
-    if (exists != mQueue.end()) return;
-    mQueue.push_back(s);
+    if (exists != mStack.end()) return;
+    mStack.push_back(s);
 
 }
 
@@ -115,9 +130,9 @@ void StateManager::mainLoop(size_t maxThreadCount) {
         {
             std::unique_lock<std::mutex> lock(mMutex, std::try_to_lock);
             if (!lock) break;
-            if (!mQueue.empty() && threadCount < maxThreadCount) {
-                s = mQueue.front();
-                mQueue.pop_front();
+            if (!mStack.empty() && threadCount < maxThreadCount) {
+                s = mStack.back();
+                mStack.pop_back();
                 ++threadCount;
             }
         }

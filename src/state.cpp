@@ -59,7 +59,6 @@ std::optional<std::string> State::loadImage() {
     fclose(mImageData.file_handler);
     mImageData.file_handler = nullptr;
 
-    SDL_Log("INFO: `%s` is loaded!\n", mPath);
     return std::nullopt;
 }
 
@@ -230,7 +229,6 @@ bool State::resetTextureAndImage() {
         SDL_DestroyTexture(mTexture);
         mTexture = nullptr;
         mTextureLoaded = false;
-        SDL_Log("INFO: `%s` texture unloaded!\n", mPath);
         didSomething = true;
     }
 
@@ -238,10 +236,7 @@ bool State::resetTextureAndImage() {
         stbi_image_free(mImageData.data);
         mImageData.data = nullptr;
         mImageDataLoaded = false;
-        SDL_Log("INFO: `%s` image data freed!\n", mPath);
         didSomething = true;
     }
-    //
-    // mImageData = {};
     return didSomething;
 }
