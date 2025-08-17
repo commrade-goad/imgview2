@@ -3,6 +3,23 @@
 #include <iostream>
 #include <cstring>
 
+static inline void printHelp() {
+    std::cout << "imgview <flag> [infile] [infile] ...\n";
+    std::cout << "<flag>:\n";
+    std::cout << "  -x         : Disable WAYLAND checking and default to x11.\n";
+    std::cout << "  -h         : Print this help.\n";
+    std::cout << "  -v         : Print program version.\n";
+    std::cout << "  -j [n]     : The thread count for the lazy loading.\n";
+    std::cout << "  -w [w]x[h] : Specify the window size.\n";
+}
+
+#ifndef FULL_VERSION
+#define FULL_VERSION "Unknown"
+#endif
+static inline void printVersion() {
+    std::cout << "imgview " << FULL_VERSION << std::endl;
+}
+
 std::optional<std::string> ProgramOpt::checkArgs(int argc, size_t min) {
     std::string buffer;
     buffer.resize(512);
@@ -16,6 +33,7 @@ std::optional<std::string> ProgramOpt::checkArgs(int argc, size_t min) {
 ProgramOpt::ProgramOpt(int argc, char **argv, size_t min) {
     mError = 0;
     mCheckWayland = true;
+    instantExit = false;
     mWindowSize = std::pair<size_t, size_t> (1280, 720);
     mThreadCount = 4;
 
@@ -45,6 +63,14 @@ ProgramOpt::ProgramOpt(int argc, char **argv, size_t min) {
                 case 'j':
                     capture_mode = true;
                     flag = 'j';
+                    break;
+                case 'h':
+                    printHelp();
+                    instantExit = true;
+                    break;
+                case 'v':
+                    printVersion();
+                    instantExit = true;
                     break;
                 default:
                     std::cerr << "ERROR: Unknown option: " << current[j] << std::endl;

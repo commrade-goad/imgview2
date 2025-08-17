@@ -19,21 +19,6 @@ that written in CPP to decrease the amount of `SEGFAULT` imgview has and lazy lo
 
 ## Build
 
-### Meson
-
-1. Generate build directory
-
-```sh
-meson setup build --buildtype=release # or debug
-```
-
-2. Build the project
-```sh
-meson compile -C build
-```
-
-3. Use it.
-
 ### CMake
 
 1. Make build directory and cd to it

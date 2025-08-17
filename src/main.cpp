@@ -12,7 +12,8 @@
 
 int main(int argc, char **argv) {
     ProgramOpt opt(argc, argv, MINARGS);
-    if (opt.mError > 0) return -1;
+    if (opt.mError > 0) return 1;
+    if (opt.instantExit) return 1;
 
     Window w(WINSIZE_X, WINSIZE_Y, WINFPS, WINAME);
     auto fail = w.initWindow();
@@ -25,24 +26,19 @@ int main(int argc, char **argv) {
         int idx = sm.newState(&w, fileIn.c_str());
         if (idx < 0) {
             continue;
-            /*
-            sm.stopLoop();
-            smThread.join();
-            return -1;
-            */
         }
     }
 
     if (!sm.activateState(0ul)) {
         sm.stopLoop();
         smThread.join();
-        return -1;
+        return 1;
     }
 
     if (!w.startWindowLoop(&sm)) {
         sm.stopLoop();
         smThread.join();
-        return -1;
+        return 1;
     }
 
     sm.stopLoop();

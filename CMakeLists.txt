@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(imgview VERSION 1.1 LANGUAGES CXX)
+project(imgview VERSION 2.0 LANGUAGES CXX)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -12,6 +12,16 @@ if (MSVC)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
+
+# Get Git hash (short)
+execute_process(
+    COMMAND git rev-parse --short HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+set(FULL_VERSION "${PROJECT_VERSION} (${GIT_HASH})")
 
 # Find dependencies
 find_package(PkgConfig REQUIRED)
@@ -29,6 +39,14 @@ set(SOURCES
 
 # Create executable
 add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+    VERSION_MINOR=${PROJECT_VERSION_MINOR}
+    VERSION_PATCH=${PROJECT_VERSION_PATCH}
+    VERSION_STRING="${PROJECT_VERSION}"
+    FULL_VERSION="${FULL_VERSION}"
+)
 
 # Include and link
 target_include_directories(${PROJECT_NAME} PRIVATE ${SDL3_INCLUDE_DIRS})
