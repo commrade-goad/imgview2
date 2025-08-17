@@ -1,6 +1,7 @@
 #include "stateman.h"
 #include <iostream>
 #include <thread>
+#include <algorithm>
 
 StateManager::StateManager() {
     mActive = nullptr;
@@ -28,21 +29,19 @@ bool StateManager::activateState(size_t idx) {
     if (idx < mStates.size()) {
         mActive = mStates[idx];
         mActiveIdx = idx;
-        if (!mActive->mTextureLoaded) {
-            mActive->createTexture();
-        }
-        if (mActive->mFitIn) mActive->fitTextureToWindow();
-        return true;
-    }
-    return false;
-}
 
-// NOTE: Worse than the idx... Please use it if necessary only.
-bool StateManager::activateState(const char *path) {
-    int idx = -1;
-    if (auto res = _searchState(path, &idx)) {
-        mActiveIdx = idx;
-        mActive = res;
+        size_t before = std::clamp(mActiveIdx - 3, 0, (int)mStates.size());
+        size_t after  = std::clamp(mActiveIdx + 3, 0, (int)mStates.size());
+
+        for (size_t i = 0; i < mStates.size(); i++) {
+            if (i >= before &&  i <= after) {
+                if (!mStates[i]->mImageDataLoaded)
+                    addToQueue(mStates[i]);
+            }
+        }
+
+        // if (!mActive->mImageDataLoaded)
+        //     addToQueue(mActive);
         if (!mActive->mTextureLoaded) {
             mActive->createTexture();
         }
@@ -73,12 +72,19 @@ int StateManager::newState(Window *w, const char *path) {
 }
 
 size_t StateManager::addState(State *s) {
-    std::lock_guard<std::mutex> lock(mMutex);
-
     mStates.push_back(s);
-    mQueue.push(s);
-
+    // addToQueue(s);
     return mStates.size() - 1;
+}
+
+void StateManager::addToQueue(State *s) {
+    std::lock_guard<std::mutex> lock(mMutex);
+    auto exists = std::find_if(mQueue.begin(), mQueue.end(),
+            [&](State* st) { return st->mPath == s->mPath; });
+
+    if (exists != mQueue.end()) return;
+    mQueue.push_back(s);
+
 }
 
 void StateManager::deleteState(const char *path) {
@@ -100,8 +106,7 @@ void StateManager::deleteState(size_t idx) {
 
 void StateManager::mainLoop(size_t maxThreadCount) {
     static const size_t delayMs = 30;
-    std::atomic<size_t> threadCount  = 0;
-    threadCount = 0;
+    std::atomic<size_t> threadCount = 0;
     while (mRunning) {
         State *s = nullptr;
         {
@@ -109,7 +114,7 @@ void StateManager::mainLoop(size_t maxThreadCount) {
             if (!lock) break;
             if (!mQueue.empty() && threadCount < maxThreadCount) {
                 s = mQueue.front();
-                mQueue.pop();
+                mQueue.pop_front();
                 ++threadCount;
             }
         }

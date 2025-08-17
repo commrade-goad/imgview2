@@ -16,19 +16,20 @@ class StateManager {
 
         // NOTE: Access using mutex!
         std::mutex mMutex;
-        std::queue<State *> mQueue;
+        std::deque<State *> mQueue;
 
         StateManager();
         ~StateManager();
 
         bool activateState(size_t idx);
-        bool activateState(const char *path);
 
         size_t addState(State *s);
         void deleteState(const char *path);
         void deleteState(size_t idx);
         int newState(Window *w, const char *path, SDL_ScaleMode scaleMode);
         int newState(Window *w, const char *path);
+
+        void addToQueue(State *s);
 
         void mainLoop(size_t maxThreadCount);
         void stopLoop();

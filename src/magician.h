@@ -19,6 +19,7 @@ bool readn_and_match(FILE *f, size_t n, const unsigned char *except){
     if (readed != n) return false;
 
     fseek(f, 0, SEEK_SET);
+    rewind(f);
     return memcmp(buffer, except, n) == 0;
 }
 

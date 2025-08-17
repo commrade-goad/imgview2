@@ -25,6 +25,7 @@ class State {
         // NOTE: Access using mutex!
         std::mutex mMutex;
         Image mImageData;
+        bool mImageDataLoaded;
 
         State(Window *win, const char *path, SDL_ScaleMode scaleMode);
         State(Window *win, const char *path);
@@ -39,8 +40,10 @@ class State {
         void moveTexturePosBy(std::pair<int, int> n);
         void zoomTextureBy(int n);
         void fitTextureToWindow();
+        bool resetTextureAndImage();
 
     private:
         void _stateInit(Window *win, const char *path, SDL_ScaleMode mode);
         void _regenerateRec();
+        void _readnCheckFile();
 };

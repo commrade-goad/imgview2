@@ -17,6 +17,7 @@ ProgramOpt::ProgramOpt(int argc, char **argv, size_t min) {
     mError = 0;
     mCheckWayland = true;
     mWindowSize = std::pair<size_t, size_t> (1280, 720);
+    mThreadCount = 4;
 
     auto status = checkArgs(argc, min);
     if (status.has_value()) {

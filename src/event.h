@@ -41,6 +41,7 @@ static inline void handleKeyCommand(Window *w, StateManager *sm, SDL_Event *ev) 
 */
 
 static inline void handleKeyNormal(Window *w, StateManager *sm, SDL_Event *ev) {
+    (void)w;
     switch (ev->key.key) {
         case SDLK_MINUS:
             sm->mActive->zoomTextureBy(-ZOOM_INCREMENT);

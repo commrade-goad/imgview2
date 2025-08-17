@@ -40,16 +40,19 @@ std::optional<std::string> State::loadImage() {
     std::string result;
     result.resize(512);
 
-    if (!mImageData.file_handler) return std::nullopt;
+    if (mImageDataLoaded) return std::nullopt;
+    if (!mImageData.file_handler) _readnCheckFile();
 
     unsigned char *data = stbi_load_from_file(mImageData.file_handler, &mImageData.x, &mImageData.y, &mImageData.n, 4);
     if (!data) {
         snprintf(result.data(), result.size(),
                  "ERROR: Failed to load the image `%s`: %s\n", mPath, stbi_failure_reason());
         mError++;
+        data = nullptr;
         return result;
     }
     mImageData.data = data;
+    mImageDataLoaded = true;
     fclose(mImageData.file_handler);
 
     return std::nullopt;
@@ -107,25 +110,13 @@ void State::_regenerateRec() {
         mTexture->h * (mZoom / 100.0f)
     };
 }
-
-void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
-    mPath = path;
-    mZoom = 100;
-    mTexture = nullptr;
-    mScaleMode = mode;
-    mWindow = win;
-    mError = 0;
-    mTextureLoaded = false;
-    mImageData = {};
-    mRec = {};
-    mFitIn = true;
-
+void State::_readnCheckFile() {
     // Try to load the file
-    mImageData.file_handler= fopen(path, "rb");
+    mImageData.file_handler= fopen(mPath, "rb");
     if (!mImageData.file_handler) {
         std::cerr
             << "ERROR: Failed to open the file `"
-            << path << "` : "
+            << mPath << "` : "
             << strerror(errno) << std::endl;
         mError++;
     }
@@ -135,9 +126,23 @@ void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
     {
         std::cerr
             << "ERROR: unsupported format for file `"
-            << path << "`." << std::endl;
+            << mPath << "`." << std::endl;
         mError++;
     }
+}
+
+void State::_stateInit(Window *win, const char *path, SDL_ScaleMode mode) {
+    mPath = path;
+    mZoom = 100;
+    mTexture = nullptr;
+    mScaleMode = mode;
+    mWindow = win;
+    mError = 0;
+    mTextureLoaded = false;
+    mImageDataLoaded = false;
+    mImageData = {};
+    mRec = {};
+    mFitIn = true;
 }
 
 void State::renderTexture(){
@@ -211,4 +216,8 @@ void State::fitTextureToWindow() {
 
     mZoom = round((mRec.w / mTexture->w) * 100);
     mFitIn = true;
+}
+
+bool State::resetTextureAndImage() {
+    return false;
 }
