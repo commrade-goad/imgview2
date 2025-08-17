@@ -41,7 +41,10 @@ std::optional<std::string> State::loadImage() {
     result.resize(512);
 
     if (mImageDataLoaded) return std::nullopt;
-    if (!mImageData.file_handler) _readnCheckFile();
+    if (!mImageData.file_handler) _readnCheckFile(); // TODO: Move the fclose inside here if fail.
+                                                     // need to change couple of stuff
+                                                     // like right here need to check if mError is
+                                                     // more than 0 then dont need to fclose().
 
     unsigned char *data = stbi_load_from_file(mImageData.file_handler, &mImageData.x, &mImageData.y, &mImageData.n, 4);
     if (!data) {
@@ -54,7 +57,9 @@ std::optional<std::string> State::loadImage() {
     mImageData.data = data;
     mImageDataLoaded = true;
     fclose(mImageData.file_handler);
+    mImageData.file_handler = nullptr;
 
+    SDL_Log("INFO: `%s` is loaded!\n", mPath);
     return std::nullopt;
 }
 
@@ -68,7 +73,6 @@ std::optional<std::string> State::createTexture() {
     if (!mImageData.data) {
         snprintf(result.data(), result.size(),
                  "ERROR: Image is not loaded! Can't make a texture from void!\n");
-        stbi_image_free(mImageData.data);
         return result;
     }
 
@@ -79,7 +83,6 @@ std::optional<std::string> State::createTexture() {
     if (!surface) {
         snprintf(result.data(), result.size(),
                  "ERROR: Failed to create the surface from image: %s\n", SDL_GetError());
-        stbi_image_free(mImageData.data);
         mError++;
         return result;
     }
@@ -94,6 +97,8 @@ std::optional<std::string> State::createTexture() {
 
     SDL_DestroySurface(surface);
     stbi_image_free(mImageData.data);
+    mImageData = {};
+    mImageDataLoaded = false;
     if (strlen(result.data()) > 0) return result;
     else {
         mTextureLoaded = true;
@@ -219,5 +224,24 @@ void State::fitTextureToWindow() {
 }
 
 bool State::resetTextureAndImage() {
-    return false;
+    bool didSomething = false;
+
+    if (mTexture && mTextureLoaded) {
+        SDL_DestroyTexture(mTexture);
+        mTexture = nullptr;
+        mTextureLoaded = false;
+        SDL_Log("INFO: `%s` texture unloaded!\n", mPath);
+        didSomething = true;
+    }
+
+    if (mImageData.data) {
+        stbi_image_free(mImageData.data);
+        mImageData.data = nullptr;
+        mImageDataLoaded = false;
+        SDL_Log("INFO: `%s` image data freed!\n", mPath);
+        didSomething = true;
+    }
+    //
+    // mImageData = {};
+    return didSomething;
 }

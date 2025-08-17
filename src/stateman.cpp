@@ -34,9 +34,12 @@ bool StateManager::activateState(size_t idx) {
         size_t after  = std::clamp(mActiveIdx + 3, 0, (int)mStates.size());
 
         for (size_t i = 0; i < mStates.size(); i++) {
-            if (i >= before &&  i <= after) {
+            if ((i >= before && i <= after) || mActive->mPath == mStates[i]->mPath) {
                 if (!mStates[i]->mImageDataLoaded)
                     addToQueue(mStates[i]);
+            } else {
+                if (mActiveIdx == 0) continue;
+                mStates[i]->resetTextureAndImage();
             }
         }
 
