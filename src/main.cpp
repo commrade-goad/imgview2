@@ -20,8 +20,6 @@ int main(int argc, char **argv) {
     if (fail.has_value()) std::cerr << fail.value();
 
     StateManager sm = {};
-    std::thread smThread(&StateManager::mainLoop, &sm, opt.mThreadCount);
-
     for (auto &fileIn: opt.mInputFile) {
         int idx = sm.newState(&w, fileIn.c_str());
         if (idx < 0) {
@@ -31,9 +29,10 @@ int main(int argc, char **argv) {
 
     if (!sm.activateState(0ul)) {
         sm.stopLoop();
-        smThread.join();
         return 1;
     }
+
+    std::thread smThread(&StateManager::mainLoop, &sm, opt.mThreadCount);
 
     if (!w.startWindowLoop(&sm)) {
         sm.stopLoop();
